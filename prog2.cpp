@@ -62,7 +62,7 @@ const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_r
     char letter = '\0'; // 22
     int char_count = 0; // 23 keeps track of number of characters in each file
     char* buffer = new char[64](); // 26
-    char* token = '\0'; // 27
+    char* token = nullptr; // 27
     int node1, node2 = 0; // 28 29
 
     // for (int i=0; i < num_bytes; i++){ // 21
@@ -109,7 +109,7 @@ void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank, 
     char letter = '\0'; // 37
     int char_count = 0; // 38 keeps track of number of characters in each file
     char* buffer = new char[64](); // 39
-    char* token = '\0'; // 27
+    char* token = nullptr; // 27
     int node = 0, n_count = 0, p_id = 0, node_index = 0; // 40 41 45 46
 
     // use num_bytes in loop condition
@@ -170,7 +170,7 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int& lar
     char letter = '\0'; // 47
     int char_count = 0; // 48 keeps track of number of characters in each file
     char* buffer = new char[64](); // 49
-    char* token = '\0'; // 50
+    char* token = nullptr; // 50
     int node1 = 0, node2 = 0, edge_index = 0, line_number = 0; // 51 52 53 54
 
     // use num_bytes in loop condition
