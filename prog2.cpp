@@ -360,7 +360,7 @@ int main(int argc, char * argv[]){
         if(i == world_rank){
             cout << "time to read input files by partition " << i << " = "<<duration.count() <<"sec"<<endl;
         }
-        //MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
@@ -416,7 +416,7 @@ int main(int argc, char * argv[]){
         if(i == world_rank){
             cout << "time for round " << round << ", partition "<< i << " = " <<duration.count() <<"sec"<<endl;
         }
-        //MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if(world_rank == 0){
@@ -448,7 +448,7 @@ int main(int argc, char * argv[]){
         if(i == world_rank){
             cout << "time to write output files by partition " << i << " = "<<duration.count() <<"sec"<<endl;
         }
-       // MPI_Barrier(MPI_COMM_WORLD);
+       MPI_Barrier(MPI_COMM_WORLD);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
