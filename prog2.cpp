@@ -353,12 +353,13 @@ int main(int argc, char * argv[]){
     print_time(start, end, duration,max_duration, world_rank, output);
 
     for (int i=0; i<world_size; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
         if(i == world_rank){
             cout << "time to read input files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
-        MPI_Barrier(MPI_COMM_WORLD);
+        
     }
-   
+    MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
             cout << "Total time to read input files by all partitions = " << max_duration << "sec" <<endl << endl;
     }
@@ -414,11 +415,12 @@ int main(int argc, char * argv[]){
         print_time(start, end, duration,max_duration, world_rank, output);
 
         for (int i=0; i < world_size; i++){
-        if(i == world_rank){
-            cout << "time for round " << round << ", partition "<< i << " = " << duration.count() <<"sec"<<endl;
+            MPI_Barrier(MPI_COMM_WORLD);
+            if(i == world_rank){
+                cout << "time for round " << round << ", partition "<< i << " = " << duration.count() <<"sec"<<endl;
+            }
         }
         MPI_Barrier(MPI_COMM_WORLD);
-        }
         if(world_rank == 0){
                 cout << "Total time for round "<< round <<" by all partitions = " << max_duration << "sec" <<endl << endl;
         }
@@ -444,10 +446,11 @@ int main(int argc, char * argv[]){
     end = high_resolution_clock::now();
     print_time(start, end, duration, max_duration, world_rank, output);
     for (int i=0; i<world_size; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
         if(i == world_rank){
             cout << "time to write output files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
-       MPI_Barrier(MPI_COMM_WORLD);
+
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
