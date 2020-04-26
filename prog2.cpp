@@ -26,6 +26,7 @@ double print_time(time_point<high_resolution_clock>& start, time_point<high_reso
     duration = end - start;
     double duration_seconds = duration.count();
     double max_duration;
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX,0, MPI_COMM_WORLD);
     return max_duration;
 }
