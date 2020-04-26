@@ -1,1 +1,0 @@
-Homeworks and assignments

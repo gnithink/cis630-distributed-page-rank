@@ -17,6 +17,7 @@ strtok.cpp
 fl_compact.tab
 fl_compact_part.2
 fl_compact_part.4
+*.out
 
 # Compiled source #
 ###################
