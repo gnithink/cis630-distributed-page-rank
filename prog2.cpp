@@ -20,15 +20,15 @@ Uncomment lines 74 to 97
 using namespace std;
 using namespace std:: chrono;
 
-double print_time(time_point<high_resolution_clock>& start, time_point<high_resolution_clock>& end, 
-                duration<double>& duration, int world_rank, ofstream &output){
+void print_time(time_point<high_resolution_clock>& start, time_point<high_resolution_clock>& end, 
+                duration<double>& duration, double& max_duration, int world_rank, ofstream &output){
                     
     duration = end - start;
     double duration_seconds = duration.count(); // calcularion
-    double max_duration;
+    
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-    return max_duration;
+
 }
 
 const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_rank){
@@ -215,6 +215,7 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDG
 int main(int argc, char * argv[]){
     time_point<high_resolution_clock> start, end, start_init, end_init;
     start_init = high_resolution_clock::now();
+    double max_duration;
 
     chrono::duration<double> duration;
     start = high_resolution_clock::now();
@@ -349,18 +350,17 @@ int main(int argc, char * argv[]){
 
     
     end = high_resolution_clock::now();
-    double duration_read = 0;
-    duration_read = print_time(start, end, duration, world_rank, output);
+    print_time(start, end, duration,max_duration, world_rank, output);
 
     for (int i=0; i<world_size; i++){
         if(i == world_rank){
-            cout << "time to read input files by partition " << i << " = "<<duration.count() <<"sec"<<endl;
+            cout << "time to read input files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
    
     if(world_rank == 0){
-            cout << "Total time to read input files by all partitions = " << duration_read << "sec" <<endl << endl;
+            cout << "Total time to read input files by all partitions = " << max_duration << "sec" <<endl << endl;
     }
 
 
@@ -411,16 +411,16 @@ int main(int argc, char * argv[]){
         MPI_Barrier(MPI_COMM_WORLD);
         end = high_resolution_clock::now();
         double duration_round = 0;
-        duration_round = print_time(start, end, duration, world_rank, output);
+        print_time(start, end, duration,max_duration, world_rank, output);
 
         for (int i=0; i < world_size; i++){
         if(i == world_rank){
-            cout << "time for round " << round << ", partition "<< i << " = " <<duration.count() <<"sec"<<endl;
+            cout << "time for round " << round << ", partition "<< i << " = " << duration.count() <<"sec"<<endl;
         }
         MPI_Barrier(MPI_COMM_WORLD);
         }
         if(world_rank == 0){
-                cout << "Total time for round "<< round <<" by all partitions = " << duration_round << "sec" <<endl << endl;
+                cout << "Total time for round "<< round <<" by all partitions = " << max_duration << "sec" <<endl << endl;
         }
     }
 
@@ -442,17 +442,16 @@ int main(int argc, char * argv[]){
     }
 
     end = high_resolution_clock::now();
-    double duration_write = 0;
-    duration_write = print_time(start, end, duration, world_rank, output);
+    print_time(start, end, duration, max_duration, world_rank, output);
     for (int i=0; i<world_size; i++){
         if(i == world_rank){
-            cout << "time to write output files by partition " << i << " = "<<duration.count() <<"sec"<<endl;
+            cout << "time to write output files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
        MPI_Barrier(MPI_COMM_WORLD);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
-            cout << "Total time to write output files by all partitions = " << duration_write << "sec" <<endl << endl;
+            cout << "Total time to write output files by all partitions = " << max_duration << "sec" <<endl << endl;
     }
 
 
@@ -499,7 +498,7 @@ int main(int argc, char * argv[]){
 
 
     end = high_resolution_clock::now();
-    print_time(start, end, duration, world_rank, output);
+    print_time(start, end, duration, max_duration ,world_rank, output);
 
     
     //MPI_Barrier(MPI_COMM_WORLD);
@@ -510,10 +509,9 @@ int main(int argc, char * argv[]){
     delete [] CREDIT_GLOBAL;
 
     end_init = high_resolution_clock::now();
-    double duration_end = 0;
-    duration_end = print_time(start_init, end_init, duration, world_rank, output);
+    print_time(start_init, end_init, duration, max_duration,world_rank, output);
     if (world_rank == 0){
-        cout << "Time to complete all processes " << duration_end << "sec"<< endl;
+        cout << "Time to complete all processes " << max_duration << "sec"<< endl;
     }
     output.close();
     MPI_Finalize(); 
