@@ -362,6 +362,7 @@ int main(int argc, char * argv[]){
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
+    MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
             cout << "Total time to read input files by all partitions = " << duration_read << "sec" <<endl << endl;
     }
