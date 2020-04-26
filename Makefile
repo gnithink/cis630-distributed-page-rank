@@ -1,5 +1,7 @@
-cc = "/usr/local/bin/mpicxx"
-GCC = "/usr/local/bin/mpicxx"
+# cc = "/usr/local/bin/mpicxx"
+# GCC = "/usr/local/bin/mpicxx"
+cc = "/usr/bin/mpicxx"
+GCC = "/usr/bin/mpicxx"
 GraphFile = fl_compact.tab 
 #GraphFile = r_graph.txt
 #GraphFile = or_undir.tab.txt
