@@ -1,12 +1,16 @@
-# cc = "/usr/local/bin/mpicxx"
-# GCC = "/usr/local/bin/mpicxx"
-cc = "/usr/bin/mpicxx"
-GCC = "/usr/bin/mpicxx"
+ cc = "/usr/local/bin/mpicxx"
+ GCC = "/usr/local/bin/mpicxx"
+# cc = "/usr/bin/mpicxx"
+# GCC = "/usr/bin/mpicxx"
+
+# GraphFile = r_graph.txt
+# PartitionFile = r_graph_process.txt
+
+# GraphFile = or_undir.tab.txt
+
 GraphFile = fl_compact.tab 
-#GraphFile = r_graph.txt
-#GraphFile = or_undir.tab.txt
 PartitionFile = fl_compact_part.4
-#PartitionFile = r_graph_process.txt
+
 rounds = 5
 partitions = 4
 

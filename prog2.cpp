@@ -30,8 +30,7 @@ double print_time(time_point<high_resolution_clock>& start, time_point<high_reso
     return max_duration;
 }
 
-const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_rank, 
-                                int& largest_node_id, int& smallest_node_id, int& edge_count){
+const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_rank){
     int fd = open(fname, O_RDONLY); // 19
     if(fd == -1){
         if (world_rank == 0){
@@ -57,22 +56,22 @@ const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_r
         return fname;
     }
 
-    //Getting the largest and smallest node value
-    // use numb_bytes in loop condition
-    char letter = '\0'; // 22
+    return addr;
+}
+void largest_and_smallest_node(const char* pp, size_t& num_bytes, int& largest_node_id,
+                                int& smallest_node_id, int& edge_count){
+
     int char_count = 0; // 23 keeps track of number of characters in each file
     char* buffer = new char[64](); // 26
     char* token = nullptr; // 27
-    int node1, node2 = 0; // 28 29
+    int node = 0, n_count = 0; // 28 29
 
     for (int i=0; i < num_bytes; i++){ // 21
-        letter = addr[i];
         char_count++;
-        if (letter == '\n'){
-            edge_count++;
+        if (pp[i] == '\n'){
         
             for (int j = 0; j < char_count -1; j++){  // 25 char_count - 1 to remove the '\n at the end'
-                buffer[j] = addr[i - (char_count -1) + j];
+                buffer[j] = pp[i - (char_count -1) + j];
             }
             buffer[char_count - 1 ] = '\0';
             //cout << buffer << " lines " << edge_count;
@@ -80,37 +79,37 @@ const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_r
 
             // extacting 1st and 2nd string set characters from file
             token = strtok(buffer, "\t");
-            node1 = atoi(token);
+            node = atoi(token);
             token = strtok(NULL, "\t");
-            node2 = atoi(token);
+            n_count = atoi(token);
             //cout << " node1 " << node1 << " node2 "<< node2;
-
+            edge_count += n_count;
             // finding the largest and smallest nodeids
-            if (node1 > largest_node_id)
-                largest_node_id = node1;
-            if (node2 > largest_node_id)
-                largest_node_id = node2;
+            if (node > largest_node_id)
+                largest_node_id = node;
             
-            if (node1 < smallest_node_id)
-                smallest_node_id = node1;
-            if (node2 < smallest_node_id)
-                smallest_node_id = node2;
-        }
+            if (node < smallest_node_id)
+                smallest_node_id = node;
+            
+        }  
     }
+    edge_count /= 2;
 
     delete [] buffer;
-    return addr;
+    return;
 }
 
+
+
 //pp is the partition pointer
-void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank, int& largest_node_id,
-                                    int& smallest_node_id, int* NEIGH_COUNT, int* PROCESS_ID){
+void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank,
+                             int* NEIGH_COUNT, int* PROCESS_ID){
     
     char letter = '\0'; // 37
     int char_count = 0; // 38 keeps track of number of characters in each file
     char* buffer = new char[64](); // 39
     char* token = nullptr; // 27
-    int node = 0, n_count = 0, p_id = 0, node_index = 0; // 40 41 45 46
+    int node = 0, n_count = 0, p_id = 0, node_index = 0, line_number = 0; // 40 41 45 46
 
     // use num_bytes in loop condition
     for (int i = 0; i < num_bytes; i++){ // 42
@@ -134,9 +133,10 @@ void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank, 
             p_id = atoi(token);
             // if (world_rank == 0)
             //     cout << " node " << node << " n_count "<< n_count << " p_id " << p_id << endl;
-            node_index = node - smallest_node_id + 1;
-            NEIGH_COUNT[node_index] = n_count;
-            PROCESS_ID[node_index] = p_id;
+            // MADE THIS CHANGE AT THE END . NEIGH_COUNT[node_index] -> NEIGH_COUNT[node]
+            //node_index = node - smallest_node_id + 1;
+            NEIGH_COUNT[node] = n_count;
+            PROCESS_ID[node] = p_id;
             
         }
     }
@@ -164,8 +164,7 @@ void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank, 
     // }
 }
 
-void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int& largest_node_id,
-                    int& smallest_node_id, int& edge_count, int* EDGE_ARRAY){
+void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDGE_ARRAY){
 
     char letter = '\0'; // 47
     int char_count = 0; // 48 keeps track of number of characters in each file
@@ -199,7 +198,6 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int& lar
         }
     }
 
-
     // if (world_rank == 0 ){
     //     cout << "Edges :" << endl;
     //     int counter = 0, break_point = 10; // 56 57
@@ -212,7 +210,6 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int& lar
     //     }
     // }
 }
-
 
 int main(int argc, char * argv[]){
     time_point<high_resolution_clock> start, end, start_init, end_init;
@@ -243,7 +240,7 @@ int main(int argc, char * argv[]){
     //MPI_Barrier(MPI_COMM_WORLD);
 
     // writing all the cout and print statements to ouptut files
-    std::string filename = "out" + to_string(world_rank)+".txt"; // 5
+    std::string filename = "Partition" + to_string(world_rank)+".out"; // 5
     ofstream output; // 6
     output.open(filename, ios::out);
     /*
@@ -277,16 +274,18 @@ int main(int argc, char * argv[]){
     }
 
     // Memory mapping both the graph and the partition file
-    size_t num_bytes_graph = 0; // 14 
-    int largest_node_id_graph = 1624992, smallest_node_id_graph = 1, edge_count_graph = 20000000; // 16 17 24
-    const char *graph_pointer  = get_file_map_info(graph, num_bytes_graph, world_rank, 
-                                                    largest_node_id_graph, smallest_node_id_graph, edge_count_graph); // 18
+    size_t num_bytes_graph = 0; // 14
+    const char *graph_pointer  = get_file_map_info(graph, num_bytes_graph, world_rank); // 18
     
 
     size_t num_bytes_partition = 0; // 15
-    int largest_node_id_partition = 1624992, smallest_node_id_partition = 1, num_lines_partition = 0; //30 31 32
-    const char *partition_pointer = get_file_map_info(partition, num_bytes_partition, world_rank, 
-                                                        largest_node_id_partition, smallest_node_id_partition,num_lines_partition); // 33
+    const char *partition_pointer = get_file_map_info(partition, num_bytes_partition, world_rank); // 33
+
+    int largest_node_id_graph = 0; 
+    int smallest_node_id_graph = INT32_MAX; 
+    int edge_count_graph = 0;
+    largest_and_smallest_node(partition_pointer, num_bytes_partition,largest_node_id_graph, 
+                                smallest_node_id_graph, edge_count_graph);
 
     // Error checking for file reading graph and partition file
     if (strlen(graph_pointer) == strlen(graph)){
@@ -315,9 +314,6 @@ int main(int argc, char * argv[]){
     // cout << "smallest node id graph " << smallest_node_id_graph << endl;
 
     // cout << "num bytes in partition " << num_bytes_partition << endl;
-    // cout << "num lines partition " << num_lines_partition << endl;
-    // cout << "largest node id partition " << largest_node_id_partition << endl;
-    // cout << "smallest node id partition " << smallest_node_id_partition << endl;
     // }
 
     /*
@@ -337,11 +333,10 @@ int main(int argc, char * argv[]){
 
 
     
-    populate_neighbor_pid(partition_pointer, num_bytes_partition, world_rank, largest_node_id_partition,
-                            smallest_node_id_partition ,NEIGH_COUNT, PROCESS_ID);
+    populate_neighbor_pid(partition_pointer, num_bytes_partition, world_rank,
+                            NEIGH_COUNT, PROCESS_ID);
     
-    populate_graph(graph_pointer, num_bytes_graph, world_rank, largest_node_id_graph,
-                        smallest_node_id_graph, edge_count_graph, EDGE_ARRAY);
+    populate_graph(graph_pointer, num_bytes_graph, world_rank, EDGE_ARRAY);
 
     // storing the reciprocal of NEIGH_COUNT array
     for (int i = 0; i <= largest_node_id_graph; i++){
@@ -379,26 +374,30 @@ int main(int argc, char * argv[]){
     int round_offset = 0, round_offset_one = 0, node1 = 0, node2 = 0, edge_list_offset = 0; // 69 70 71 72 73
 
     for(int i = 1; i <= largest_node_id_graph; i++ ){ //68
-        //if(world_rank == PROCESS_ID[i])
-            CREDIT_GLOBAL[i] = 1;
+        CREDIT_GLOBAL[i] = 1;
+        if(world_rank == PROCESS_ID[i])
+            CREDIT_LOCAL[i] = 1;
     }
 
+    // if(world_rank == 0){
+    //     cout<< "CREDIT GLOBAL BEFORE ROUNDS :" << endl;
+    //     for(int i = 1; i <= largest_node_id_graph; i++ ){ //68
 
-
-
+    //         cout<< CREDIT_GLOBAL[i] << endl;
+            
+    //     }
+    // }
 
     for (int round = 1; round <= rounds; round++){
         start = high_resolution_clock::now(); // 60
         round_offset = round*largest_node_id_graph;
         round_offset_one = (round-1) * largest_node_id_graph;
         
-
         for(int i = 0; i < edge_count_graph; i++){
             edge_list_offset = 2*i;
             node1 = EDGE_ARRAY[edge_list_offset];
             node2 = EDGE_ARRAY[edge_list_offset + 1];
 
-            
             if(world_rank == PROCESS_ID[node1]){
                 CREDIT_LOCAL[round_offset + node1] += R_COUNT[node2] * CREDIT_GLOBAL[round_offset_one + node2]; 
             }
@@ -406,8 +405,9 @@ int main(int argc, char * argv[]){
                 CREDIT_LOCAL[round_offset + node2] += R_COUNT[node1] * CREDIT_GLOBAL[round_offset_one + node1];
             }
         }
-        MPI_Barrier(MPI_COMM_WORLD);
+        
         MPI_Allreduce(CREDIT_LOCAL, CREDIT_GLOBAL ,credit_array_size,MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
         end = high_resolution_clock::now();
         double duration_round = 0;
         duration_round = print_time(start, end, duration, world_rank, output);
@@ -433,9 +433,9 @@ int main(int argc, char * argv[]){
     for(int i = 1 ; i <= largest_node_id_graph; i++){
         
         if(world_rank == PROCESS_ID[i]){
-            output << i ;
+            output << i <<'\t' << NEIGH_COUNT[i]; // << '\t' <<(int)CREDIT_LOCAL[i];
             for(int j = 1; j <= rounds; j++){
-                output << '\t' << CREDIT_GLOBAL[j*largest_node_id_graph + i]; 
+                output << '\t' << CREDIT_LOCAL[j*largest_node_id_graph + i]; 
             }
             output << '\n';
         }
@@ -488,6 +488,14 @@ int main(int argc, char * argv[]){
     //     }
     // }
 
+    // if (world_rank == 0){
+    //     cout <<"Entire Credits Global: "<< endl;
+    //     for (int r = 1 ; r <= ((rounds+1) *largest_node_id_graph); r++){
+    //         cout << CREDIT_GLOBAL[r] << endl;
+    //     }
+
+    // }
+
 
 
     end = high_resolution_clock::now();
@@ -507,7 +515,7 @@ int main(int argc, char * argv[]){
     if (world_rank == 0){
         cout << "Time to complete all processes " << duration_end << "sec"<< endl;
     }
-    
+    output.close();
     MPI_Finalize(); 
 
 }
