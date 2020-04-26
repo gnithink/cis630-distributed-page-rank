@@ -65,40 +65,40 @@ const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_r
     char* token = nullptr; // 27
     int node1, node2 = 0; // 28 29
 
-    // for (int i=0; i < num_bytes; i++){ // 21
-    //     letter = addr[i];
-    //     char_count++;
-    //     if (letter == '\n'){
-    //         edge_count++;
+    for (int i=0; i < num_bytes; i++){ // 21
+        letter = addr[i];
+        char_count++;
+        if (letter == '\n'){
+            edge_count++;
         
-    //         for (int j = 0; j < char_count -1; j++){  // 25 char_count - 1 to remove the '\n at the end'
-    //             buffer[j] = addr[i - (char_count -1) + j];
-    //         }
-    //         buffer[char_count - 1 ] = '\0';
-    //         //cout << buffer << " lines " << edge_count;
-    //         char_count = 0;
+            for (int j = 0; j < char_count -1; j++){  // 25 char_count - 1 to remove the '\n at the end'
+                buffer[j] = addr[i - (char_count -1) + j];
+            }
+            buffer[char_count - 1 ] = '\0';
+            //cout << buffer << " lines " << edge_count;
+            char_count = 0;
 
-    //         // extacting 1st and 2nd string set characters from file
-    //         token = strtok(buffer, "\t");
-    //         node1 = atoi(token);
-    //         token = strtok(NULL, "\t");
-    //         node2 = atoi(token);
-    //         //cout << " node1 " << node1 << " node2 "<< node2;
+            // extacting 1st and 2nd string set characters from file
+            token = strtok(buffer, "\t");
+            node1 = atoi(token);
+            token = strtok(NULL, "\t");
+            node2 = atoi(token);
+            //cout << " node1 " << node1 << " node2 "<< node2;
 
-    //         // finding the largest and smallest nodeids
-    //         if (node1 > largest_node_id)
-    //             largest_node_id = node1;
-    //         if (node2 > largest_node_id)
-    //             largest_node_id = node2;
+            // finding the largest and smallest nodeids
+            if (node1 > largest_node_id)
+                largest_node_id = node1;
+            if (node2 > largest_node_id)
+                largest_node_id = node2;
             
-    //         if (node1 < smallest_node_id)
-    //             smallest_node_id = node1;
-    //         if (node2 < smallest_node_id)
-    //             smallest_node_id = node2;
-    //     }
-    // }
+            if (node1 < smallest_node_id)
+                smallest_node_id = node1;
+            if (node2 < smallest_node_id)
+                smallest_node_id = node2;
+        }
+    }
 
-    // delete [] buffer;
+    delete [] buffer;
     return addr;
 }
 
