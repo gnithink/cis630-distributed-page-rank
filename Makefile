@@ -9,7 +9,7 @@ rounds = 5
 partitions = 4
 
 
-all: prog strtok prog2
+all: prog prog2
 
 strtok: strtok.cpp
 	${cc} -g -o strtok strtok.cpp 
