@@ -359,10 +359,11 @@ int main(int argc, char * argv[]){
     MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
     for (int i=0; i<world_size; i++){
-        MPI_Barrier(MPI_COMM_WORLD);
+        
         if(i == world_rank){
             cout << "--- time to read input files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
+        MPI_Barrier(MPI_COMM_WORLD);
         
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -413,7 +414,7 @@ int main(int argc, char * argv[]){
                 CREDIT_LOCAL[round_offset + node2] += R_COUNT[node1] * CREDIT_GLOBAL[round_offset_one + node1];
             }
         }
-        
+        // THIS IS ALL REDUCE AND BARRIER FOR SYNCING ROUNDS
         MPI_Allreduce(CREDIT_LOCAL, CREDIT_GLOBAL ,credit_array_size,MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         MPI_Barrier(MPI_COMM_WORLD);
         end = high_resolution_clock::now();
@@ -422,14 +423,13 @@ int main(int argc, char * argv[]){
         duration = end - start;
         duration_seconds = duration.count(); // calcularion
     
-        MPI_Barrier(MPI_COMM_WORLD);
         MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
         for (int i=0; i < world_size; i++){
-            MPI_Barrier(MPI_COMM_WORLD);
             if(i == world_rank){
                 cout << "--- time for round " << round << ", partition "<< i << " = " << duration.count() <<"sec"<<endl;
             }
+            MPI_Barrier(MPI_COMM_WORLD);
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if(world_rank == 0){
@@ -458,14 +458,14 @@ int main(int argc, char * argv[]){
     duration = end - start;
     duration_seconds = duration.count(); // calcularion
     
-    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
     //print_time(start, end, duration, max_duration, world_rank, output);
     for (int i=0; i<world_size; i++){
-        MPI_Barrier(MPI_COMM_WORLD);
+        
         if(i == world_rank){
             cout << "--- time to write output files by partition " << i << " = "<< duration.count() <<"sec"<<endl;
         }
+        MPI_Barrier(MPI_COMM_WORLD);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
