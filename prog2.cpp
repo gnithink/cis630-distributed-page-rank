@@ -133,6 +133,7 @@ void populate_neighbor_pid(const char* pp, size_t& num_bytes, int & world_rank,
             n_count = atoi(token);
             token = strtok(NULL, "\t");
             p_id = atoi(token);
+            
             // if (world_rank == 0)
             //     cout << " node " << node << " n_count "<< n_count << " p_id " << p_id << endl;
             // MADE THIS CHANGE AT THE END . NEIGH_COUNT[node_index] -> NEIGH_COUNT[node]
@@ -186,13 +187,15 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDG
             buffer[char_count - 1 ] = '\0';
             //cout << buffer << " lines " << edge_count;
             char_count = 0;
-
+            
             // extacting 1st and 2nd string set characters from file
             token = strtok(buffer, "\t");
+            //cout <<token << endl;
             node1 = atoi(token);
+            //cout<<"LINE 193" << endl;
             token = strtok(NULL, "\t");
             node2 = atoi(token);
-
+            
             edge_index = 2 * line_number;
             EDGE_ARRAY[edge_index] = node1;
             EDGE_ARRAY[edge_index + 1] = node2;
@@ -280,16 +283,15 @@ int main(int argc, char * argv[]){
     size_t num_bytes_graph = 0; // 14
     const char *graph_pointer  = get_file_map_info(graph, num_bytes_graph, world_rank); // 18
     
-
     size_t num_bytes_partition = 0; // 15
     const char *partition_pointer = get_file_map_info(partition, num_bytes_partition, world_rank); // 33
-
+    
     int largest_node_id_graph = 0; 
     int smallest_node_id_graph = INT32_MAX; 
     int edge_count_graph = 0;
     largest_and_smallest_node(partition_pointer, num_bytes_partition,largest_node_id_graph, 
                                 smallest_node_id_graph, edge_count_graph);
-
+    
     // Error checking for file reading graph and partition file
     if (strlen(graph_pointer) == strlen(graph)){
         if (world_rank == 0){
@@ -334,22 +336,21 @@ int main(int argc, char * argv[]){
     int *EDGE_ARRAY = new int[edge_count_graph * 2](); // 36 
     double *R_COUNT = new double[unique_node_range](); //69
 
-
-    
     populate_neighbor_pid(partition_pointer, num_bytes_partition, world_rank,
                             NEIGH_COUNT, PROCESS_ID);
+    // cout<<"LINE 339" << endl;
     
     populate_graph(graph_pointer, num_bytes_graph, world_rank, EDGE_ARRAY);
 
     // storing the reciprocal of NEIGH_COUNT array
     for (int i = 0; i <= largest_node_id_graph; i++){
-        if(NEIGH_COUNT[i] > 0){
+        if(NEIGH_COUNT[i] > (double)0){
             R_COUNT[i] = (double) 1/NEIGH_COUNT[i];
         }
 
     }
 
-    
+    //cout<<"LINE 353" << endl;
     end = high_resolution_clock::now();
     //print_time(start, end, duration,max_duration, world_rank, output);
     duration = end - start;
@@ -370,9 +371,6 @@ int main(int argc, char * argv[]){
     if(world_rank == 0){
             cout << "Total time to read input files by all partitions = " << max_duration << "sec" <<endl << endl;
     }
-
-
-
     
     // All arrays populated. Need to calculate credits
     // +1 for the 0th index. Not storing anything in the zeroth index
@@ -472,8 +470,6 @@ int main(int argc, char * argv[]){
             cout << "Total time to write output files by all partitions = " << max_duration << "sec" <<endl << endl;
     }
 
-
-
     //Printing the first 15 values of round1 process 1 from CREDIT_LOCAL
 
     // if (world_rank == 1 ){
@@ -489,7 +485,6 @@ int main(int argc, char * argv[]){
     //     }
     // }
     
-
     //Printing the first 15 values of round1 from CREDIT_GLOBAL
 
     // if (world_rank == 0 ){
@@ -512,11 +507,6 @@ int main(int argc, char * argv[]){
     //     }
 
     // }
-
-
-
-    
-
     
     //MPI_Barrier(MPI_COMM_WORLD);
     delete [] NEIGH_COUNT;

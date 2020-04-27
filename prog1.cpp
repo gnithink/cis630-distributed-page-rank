@@ -20,13 +20,19 @@ Are all line in the text file ended with '\0' ??
 
 */
 
+// NOTE: CODE WORKED AFTER CONVERTING VALUES OF PARTITION GRAPH TO STRING !! NOT IT DIDN'T
+// NOTE: I THINK THE ISSUE WITH THE GRAPH FILE ITSELF
+// NOTE: LOOKS LIKE THE GRAPH FILE IS SEPERATED BY SPACES AND NOT '\t' FOR FACEBOOK GRAPH
+// NOTE: WILL WRITE THE ENTIRE GRAPH TO ANOTHER FILE AND TRY IT AGAIN
+// NOTE: THE ISSUE WAS WITH THE SPACING BETWEEN EACH NODE. IT WAS SPACE INSTEAD OF '\t'
 
 # include <iostream>
 # include <fstream>
 # include <chrono>
-#include <algorithm>
-#include <cstring>
-#include <iomanip>
+# include <algorithm>
+# include <cstring>
+# include <iomanip>
+# include <random>
 
 // for mmmap
 #include <sys/mman.h>
@@ -65,11 +71,15 @@ const char* map_file(char const *fname, size_t& length)
 
 int main( int argc, char const **argv)
 {
+   if(argc !=8){
+   cout << "usage: ./prog <input_graph> <output_graph> <partition_grpah> <rounds> <partitions>";
+   }
    std::cout << std::fixed;
    std::cout << std::setprecision(6);
    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
    start = std::chrono::high_resolution_clock::now();
 
+   
    int *NEIGH_COUNT;
    NEIGH_COUNT = new int[MAXNODEID](); // array of size 50 million for storing neighbor count
    long double *R_COUNT = new long double[MAXNODEID](); // array for storing reciprocal of neighbor count
@@ -83,8 +93,17 @@ int main( int argc, char const **argv)
    // need to check if length of output file from argv[] is greater than OUTPUT 
    char OUTPUT[64]= "";
    strcpy(OUTPUT, argv[2]); 
+
+   char PARTITION[64] = "";
+   strcpy(PARTITION, argv[3]);
+
+   int ROUNDS = atoi(argv[4]);
+   int num_partitions = atoi(argv[5]);
+   int new_file_flag = atoi(argv[6]);
+   char NEW_FILE[64] = "";
+   strcpy(NEW_FILE, argv[7]);
    
-   int ROUNDS = atoi(argv[3]);
+
 
    size_t length; //size of the file in bytes
    const char *fp = map_file(argv[1], length);
@@ -132,18 +151,19 @@ int main( int argc, char const **argv)
 
          // parsing each line or edge into two individual nodes using the delimiter '\t'
          char * pch;
-         pch = strtok (buffer,"\t");
+         pch = strtok (buffer," \t");
          node1 = atoi(pch);
          //cout << "nodeA " << pch << endl;
          while (pch != NULL)
          {
             //printf ("%s\n",buffer);
-            pch = strtok (NULL, "\t");
+            pch = strtok (NULL, " \t");
             if (pch != NULL){
             node2 = atoi(pch);
             //cout << "nodeB " << pch << endl;
             }
          }
+         
 
 
          // counting the number of neighbors for each node
@@ -162,7 +182,10 @@ int main( int argc, char const **argv)
          //storing the edge list in a flat array
          edge_list_offset = 2*line_number;
          EDGE_LIST[edge_list_offset] = node1;
+         
+         
          EDGE_LIST[edge_list_offset + 1] = node2;
+         
          line_number ++; 
          
 
@@ -209,10 +232,11 @@ int main( int argc, char const **argv)
    node2 = 0;
    edge_list_offset = 0;
 
-   for (int n = 0 ; n <=largest_node_id ; n++){
+   for (int n = 1 ; n <=largest_node_id ; n++){
       CREDIT[n] = 1;
    }
-   CREDIT[0] = 0;
+   CREDIT[0] = 1;
+
    //cout << R_COUNT[4] << " r and neigh count  "<< NEIGH_COUNT[4]; 
 
    int counter = 0 ;
@@ -229,9 +253,9 @@ int main( int argc, char const **argv)
          node2 = EDGE_LIST[edge_list_offset +1]; // 1, 3, 5, 7
          //cout << node1 << '\t' << node2 << endl;
          
-         if(node1 == 0 || node2 == 0){
-            cout << "some node id is 0";
-         }
+         // if(node1 == 0 || node2 == 0){
+         //    cout << "some node id is 0";
+         // }
 
          // egde = 1 ---- 2
          //credit[r*lnid + 1] = r_count[2] * credit[r*lnid - lnid + 2 ]
@@ -242,7 +266,8 @@ int main( int argc, char const **argv)
    }
 
    // printing all the node ids credit value
-   // for (int r = 1 ; r <= (ROUNDS*largest_node_id); r++){
+   // ROUNDS*largest_node_id
+   // for (int r = 1 ; r <= (10); r++){
    //    cout << CREDIT[r] << endl;
    // }
    end = std::chrono::high_resolution_clock::now();
@@ -253,18 +278,40 @@ int main( int argc, char const **argv)
    ofstream o_fd;
    o_fd.open(OUTPUT, ios::out);
    o_fd.precision(6);
-
-
    
    for(int s = 1 ; s <= largest_node_id; s++){
       if(NEIGH_COUNT[s] > 0){
       o_fd<< s <<'\t' << NEIGH_COUNT[s];
-      for (int t=1; t <= ROUNDS ; t++){
+      for (int t=0; t <= ROUNDS ; t++){
          o_fd<<fixed<<setprecision(6)<<'\t'<<CREDIT[t*largest_node_id + s] ;
       }
       o_fd<<'\n';
       }
    }
+   // NOTE: MAKE THIS FLAG ZERO FROM THE COMMAND LINE TO PREVENT CREATING NEW FILES
+   if(new_file_flag){
+   ofstream p_fd;
+   p_fd.open(PARTITION, ios::out);
+   // CODE WORKED AFTER CONVERTING VALUES OF PARTITION GRAPH TO STRING
+   for (int i = 1; i <= largest_node_id; i++){
+      if(NEIGH_COUNT[i] > 0){
+         
+         p_fd << i << '\t' << NEIGH_COUNT[i] << '\t' << rand() % num_partitions << '\n';
+      }
+   }
+   p_fd.close();
+
+   ofstream new_fd;
+   new_fd.open(NEW_FILE, ios::out);
+      for (int i = 0 ; i< edge_count; i++){
+         new_fd<< EDGE_LIST[2*i] << '\t' << EDGE_LIST[2*i +1] << '\n';
+         //cout << EDGE_LIST[2*i] <<'\t' <<EDGE_LIST[2*i+1] <<'\n';
+      }
+   new_fd.close();
+   
+   }
+
+
 
 
    cout << "counter: round * no_of_edges: " << counter << endl;
