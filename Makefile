@@ -36,7 +36,7 @@ run: prog2
 
 
 clean:
-	rm *.o *.out prog strtok prog2 out0.txt out1.txt out2.txt out3.txt
+	rm *.o *.out prog strtok prog2 
 
 # target: dependencies
 # 	action
