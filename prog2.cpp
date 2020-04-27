@@ -1,6 +1,7 @@
 /*
-FOR general version change largest_node_id_graph and smallest in line 280 and 287 to 0 edge_count_graph to 0 
-Uncomment lines 74 to 97  
+cis630 - project1
+Nithin Krishna Gowda
+Distributed page rank algorithm.
 */
 #include<iostream>
 #include<fstream>
@@ -326,7 +327,7 @@ int main(int argc, char * argv[]){
      COMMON FOR ALL PARTITIONS 
      Plus 2 for ignoring 0th index and  (largest and smallest node id : 100 - 1 + 1)
     */
-    int unique_node_range = largest_node_id_graph - smallest_node_id_graph + 2; // 34
+    int unique_node_range = largest_node_id_graph + 1; // 34
     int *NEIGH_COUNT = new int[unique_node_range](); // 33
     //output << "Memory allocated for Neighbors Count Array "<<unique_node_range * sizeof(int)<< endl;
     int *PROCESS_ID = new int[unique_node_range]();// 35 
