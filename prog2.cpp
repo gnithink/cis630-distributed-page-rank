@@ -24,7 +24,7 @@ void print_time(time_point<high_resolution_clock>& start, time_point<high_resolu
                 duration<double>& duration, double& max_duration, int world_rank, ofstream &output){
                     
     duration = end - start;
-    double duration_seconds = duration.count(); // calcularion
+    double duration_seconds = duration.count(); // calculation
     
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
@@ -215,7 +215,7 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDG
 int main(int argc, char * argv[]){
     time_point<high_resolution_clock> start, end, start_init, end_init;
     start_init = high_resolution_clock::now();
-    double max_duration;
+    double max_duration =0 , duration_seconds = 0;
 
     chrono::duration<double> duration;
     start = high_resolution_clock::now();
@@ -350,7 +350,12 @@ int main(int argc, char * argv[]){
 
     
     end = high_resolution_clock::now();
-    print_time(start, end, duration,max_duration, world_rank, output);
+    //print_time(start, end, duration,max_duration, world_rank, output);
+    duration = end - start;
+    duration_seconds = duration.count(); // calcularion
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
     for (int i=0; i<world_size; i++){
         MPI_Barrier(MPI_COMM_WORLD);
@@ -411,8 +416,13 @@ int main(int argc, char * argv[]){
         MPI_Allreduce(CREDIT_LOCAL, CREDIT_GLOBAL ,credit_array_size,MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         MPI_Barrier(MPI_COMM_WORLD);
         end = high_resolution_clock::now();
-        double duration_round = 0;
-        print_time(start, end, duration,max_duration, world_rank, output);
+
+        // print_time(start, end, duration,max_duration, world_rank, output);
+        duration = end - start;
+        duration_seconds = duration.count(); // calcularion
+    
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
         for (int i=0; i < world_size; i++){
             MPI_Barrier(MPI_COMM_WORLD);
@@ -444,7 +454,12 @@ int main(int argc, char * argv[]){
     }
 
     end = high_resolution_clock::now();
-    print_time(start, end, duration, max_duration, world_rank, output);
+    duration = end - start;
+    duration_seconds = duration.count(); // calcularion
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    //print_time(start, end, duration, max_duration, world_rank, output);
     for (int i=0; i<world_size; i++){
         MPI_Barrier(MPI_COMM_WORLD);
         if(i == world_rank){
@@ -499,8 +514,7 @@ int main(int argc, char * argv[]){
 
 
 
-    end = high_resolution_clock::now();
-    print_time(start, end, duration, max_duration ,world_rank, output);
+    
 
     
     //MPI_Barrier(MPI_COMM_WORLD);
@@ -511,7 +525,12 @@ int main(int argc, char * argv[]){
     delete [] CREDIT_GLOBAL;
 
     end_init = high_resolution_clock::now();
-    print_time(start_init, end_init, duration, max_duration,world_rank, output);
+    duration = end_init - start_init;
+    duration_seconds = duration.count(); // calcularion
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Allreduce(&duration_seconds, &max_duration, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    //print_time(start_init, end_init, duration, max_duration,world_rank, output);
     if (world_rank == 0){
         cout << "Time to complete all processes " << max_duration << "sec"<< endl;
     }
