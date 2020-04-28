@@ -312,6 +312,11 @@ int main(int argc, char * argv[]){
         }
         return -1;
     }
+    if (world_size != partitions){
+        if(world_rank == 0){
+        cout << "The world_size" << world_size << "does not match with the partitions" << partitions;
+        }
+    }
     // if (world_rank == 0){
     // cout << "num bytes in graph " << num_bytes_graph << endl;
     // cout << "edge count graph " << edge_count_graph << endl;
