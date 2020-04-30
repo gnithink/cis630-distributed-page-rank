@@ -1,7 +1,7 @@
- cc = "/usr/local/bin/mpicxx"
- GCC = "/usr/local/bin/mpicxx"
-# cc = "/usr/bin/mpicxx"
-# GCC = "/usr/bin/mpicxx"
+#  cc = "/usr/local/bin/mpicxx"
+#  GCC = "/usr/local/bin/mpicxx"
+cc = "/usr/bin/mpicxx"
+GCC = "/usr/bin/mpicxx"
 
 # GraphFile = r_graph.txt
 # PartitionFile = r_graph_process.txt
