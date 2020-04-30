@@ -417,9 +417,10 @@ int main(int argc, char * argv[]){
                 CREDIT_LOCAL[round_offset + node2] += R_COUNT[node1] * CREDIT_GLOBAL[round_offset_one + node1];
             }
         }
+        MPI_Barrier(MPI_COMM_WORLD);
         // THIS IS ALL REDUCE AND BARRIER FOR SYNCING ROUNDS
         MPI_Allreduce(CREDIT_LOCAL, CREDIT_GLOBAL ,credit_array_size,MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        MPI_Barrier(MPI_COMM_WORLD);
+        
         end = high_resolution_clock::now();
 
         // print_time(start, end, duration,max_duration, world_rank, output);
