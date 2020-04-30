@@ -20,6 +20,7 @@ fl_compact.tab
 fl_compact_part.2
 fl_compact_part.4
 *.out
+!program-submission-form.txt
 
 # Compiled source #
 ###################
