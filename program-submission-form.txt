@@ -41,3 +41,7 @@ Note:
 1. "prog2" is the executable file generated after running the command "make". The files "fl_compact.tab", "fl_compact_part.2" and "fl_compact_part.4" should be in the same directory as the executable so that the make file need not be changed. 
 2. Use the command "make run2" to run the program with 2 partitions.
 3. Use the command "make run4" to run the program with 4 partitions.
+
+or the program can be run using the following commands:
+mpirun -np 4 ./prog2 /path-to-file/fl_compact.tab /path-to-file/fl_compact_part.4 5 4
+mpirun -np 2 ./prog2 /path-to-file/fl_compact.tab /path-to-file/fl_compact_part.2 5 2
