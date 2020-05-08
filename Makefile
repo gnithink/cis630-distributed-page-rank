@@ -1,7 +1,9 @@
-#  cc = "/usr/local/bin/mpicxx"
-#  GCC = "/usr/local/bin/mpicxx"
-cc = "/usr/bin/mpicxx"
-GCC = "/usr/bin/mpicxx"
+cc = "/usr/local/bin/mpicxx"
+GCC = "/usr/local/bin/mpicxx"
+
+# This is the path to the mpi in ix-dev
+# cc = "/usr/bin/mpicxx"
+# GCC = "/usr/bin/mpicxx"
 
 # GraphFile = r_graph.txt
 # PartitionFile = r_graph_process.txt

@@ -33,21 +33,28 @@ void print_time(time_point<high_resolution_clock>& start, time_point<high_resolu
 }
 
 const char* get_file_map_info(const char* fname, size_t& num_bytes, int& world_rank){
-    int fd = open(fname, O_RDONLY); // 19
-    if(fd == -1){
+
+    int fd = open(fname, O_RDONLY); // 19 // create a file pointer
+    if(fd == -1){ // errror checking
         if (world_rank == 0){
             cerr<< "error opening the file" << endl;
         }
         return fname; // if there is an error, just returning the filename back
     }
-    struct stat sb; // 20
-    if(fstat(fd, &sb) == -1){
+
+    struct stat sb; // 20 // struct to store graph file info
+
+    // FUNCTION CALL TO GET FILE INFO IS FSTAT
+    if(fstat(fd, &sb) == -1){ // error checking // fstat is the function to get the file info 
         if (world_rank == 0){
             cerr << " error in fstat " << endl ;
         }
         return fname;
     }
-    num_bytes = sb.st_size;
+    num_bytes = sb.st_size; // st_size is a varible inside the structure sb.
+                            // sb is whre all the file info is stored
+
+        // MMAP FUNCTION STRUCUTRE mmap(NULL, size_of_file, protocol reading, private mapping, fd, 0u )
     const char * addr = static_cast<const char*> (mmap(NULL, num_bytes,PROT_READ, MAP_PRIVATE, fd, 0u ));
 
     //addr[0], addr[1] give the first and 2nd character in file
@@ -64,24 +71,30 @@ void largest_and_smallest_node(const char* pp, size_t& num_bytes, int& largest_n
                                 int& smallest_node_id, int& edge_count){
 
     int char_count = 0; // 23 keeps track of number of characters in each file
-    char* buffer = new char[64](); // 26
+
+    char* buffer = new char[64](); // 26 // buffer to store each line
+
     char* token = nullptr; // 27
     int node = 0, n_count = 0; // 28 29
 
     for (int i=0; i < num_bytes; i++){ // 21
         char_count++;
+
         if (pp[i] == '\n'){
         
             for (int j = 0; j < char_count -1; j++){  // 25 char_count - 1 to remove the '\n at the end'
                 buffer[j] = pp[i - (char_count -1) + j];
             }
             buffer[char_count - 1 ] = '\0';
+
             //cout << buffer << " lines " << edge_count;
             char_count = 0;
 
             // extacting 1st and 2nd string set characters from file
+
             token = strtok(buffer, "\t");
             node = atoi(token);
+
             token = strtok(NULL, "\t");
             n_count = atoi(token);
             //cout << " node1 " << node1 << " node2 "<< node2;
@@ -195,6 +208,7 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDG
             //cout<<"LINE 193" << endl;
             token = strtok(NULL, "\t");
             node2 = atoi(token);
+
             
             edge_index = 2 * line_number;
             EDGE_ARRAY[edge_index] = node1;
@@ -280,7 +294,8 @@ int main(int argc, char * argv[]){
     }
 
     // Memory mapping both the graph and the partition file
-    size_t num_bytes_graph = 0; // 14
+    size_t num_bytes_graph = 0; // 14 
+    // graph pointer is a pointer using which I can access any specific index in the file. eg: graph_pointer[10] gives me the 11th character in the text file. 
     const char *graph_pointer  = get_file_map_info(graph, num_bytes_graph, world_rank); // 18
     
     size_t num_bytes_partition = 0; // 15
@@ -289,6 +304,8 @@ int main(int argc, char * argv[]){
     int largest_node_id_graph = 0; 
     int smallest_node_id_graph = INT32_MAX; 
     int edge_count_graph = 0;
+
+    // just getting the largest and the smallest node id 
     largest_and_smallest_node(partition_pointer, num_bytes_partition,largest_node_id_graph, 
                                 smallest_node_id_graph, edge_count_graph);
     
@@ -515,6 +532,7 @@ int main(int argc, char * argv[]){
     // }
     
     //MPI_Barrier(MPI_COMM_WORLD);
+    
     delete [] NEIGH_COUNT;
     delete [] PROCESS_ID;
     delete [] EDGE_ARRAY;
