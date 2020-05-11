@@ -21,6 +21,7 @@ fl_compact_part.2
 fl_compact_part.4
 *.out
 !program-submission-form.txt
+!edge_list_gen.py
 
 # Compiled source #
 ###################

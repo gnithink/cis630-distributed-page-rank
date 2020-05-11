@@ -227,8 +227,7 @@ void populate_graph(const char* gp, size_t& num_bytes, int& world_rank, int* EDG
     //             break;
     //         }
     //     }
-    // }
-}
+    // } 
 
 int main(int argc, char * argv[]){
     time_point<high_resolution_clock> start, end, start_init, end_init;
@@ -532,7 +531,7 @@ int main(int argc, char * argv[]){
     // }
     
     //MPI_Barrier(MPI_COMM_WORLD);
-    
+
     delete [] NEIGH_COUNT;
     delete [] PROCESS_ID;
     delete [] EDGE_ARRAY;
